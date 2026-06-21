@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hábitos Digitais — Feira de Ciências</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: system-ui, sans-serif; background: #f5f5f3; color: #1a1a1a; min-height: 100vh; }
+  #app { max-width: 680px; margin: 0 auto; padding: 1rem; }
+
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  .header { text-align: center; padding: 1.5rem 0 1rem; }
+  .badge { display: inline-block; background: #9FE1CB; color: #085041; font-size: 11px; padding: 3px 10px; border-radius: 20px; font-weight: 500; margin-bottom: 8px; }
+  .header h1 { font-size: 22px; font-weight: 500; margin-bottom: 6px; }
+  .header p { font-size: 14px; color: #555; line-height: 1.6; }
+
+  .progress-bar { background: #e5e5e5; border-radius: 4px; height: 6px; margin: 1rem 0; }
+  .progress-fill { height: 6px; border-radius: 4px; background: #1D9E75; transition: width 0.4s ease; }
+  .progress-label { font-size: 12px; color: #888; text-align: right; margin-top: 4px; }
+
+  .question-card { background: #fff; border: 1px solid #e0e0e0; border-radius: 12px; padding: 1.25rem; margin-bottom: 1rem; }
+  .question-num { font-size: 11px; color: #1D9E75; font-weight: 500; margin-bottom: 6px; }
+  .question-text { font-size: 16px; font-weight: 500; margin-bottom: 1rem; line-height: 1.5; }
+  .question-sub { font-size: 13px; color: #777; margin-bottom: 1rem; }
+
+  .options { display: flex; flex-direction: column; gap: 8px; }
+  .option-btn { text-align: left; padding: 10px 14px; border: 1px solid #ddd; border-radius: 8px; cursor: pointer; font-size: 14px; background: #fff; color: #1a1a1a; transition: all 0.15s; line-height: 1.4; }
+  .option-btn:hover { background: #f0f0f0; border-color: #1D9E75; }
+  .option-btn.selected { background: #E1F5EE; border-color: #1D9E75; color: #085041; }
+
+  .nav-row { display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; gap: 8px; }
+  .btn { padding: 9px 20px; border-radius: 8px; font-size: 14px; cursor: pointer; border: 1px solid #ccc; background: #fff; color: #1a1a1a; }
+  .btn:hover { background: #f0f0f0; }
+  .btn-primary { background: #1D9E75; color: white; border-color: #1D9E75; }
+  .btn-primary:hover { background: #0F6E56; }
+  .btn-danger { font-size: 13px; color: #993C1D; border-color: #F0997B; background: transparent; }
+  .btn-danger:hover { background: #FAECE7; }
+
+  .early-exit { text-align: center; padding: 1rem; background: #f5f5f3; border-radius: 8px; margin-top: 0.5rem; font-size: 13px; color: #777; }
+
+  .results-header { text-align: center; padding: 1rem 0; }
+  .score-ring { width: 100px; height: 100px; margin: 0 auto 1rem; position: relative; }
+  .score-ring svg { width: 100%; height: 100%; }
+  .score-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 22px; font-weight: 500; }
+  .risk-badge { display: inline-block; padding: 4px 14px; border-radius: 20px; font-size: 13px; font-weight: 500; margin-bottom: 8px; }
+  .risk-low { background: #E1F5EE; color: #085041; }
+  .risk-med { background: #FAEEDA; color: #633806; }
+  .risk-high { background: #FAECE7; color: #712B13; }
+
+  .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin: 1rem 0; }
+  .metric-card { background: #f5f5f3; border-radius: 8px; padding: 12px; text-align: center; }
+  .metric-val { font-size: 22px; font-weight: 500; margin-bottom: 4px; }
+  .metric-lbl { font-size: 12px; color: #777; }
+
+  .section-title { font-size: 16px; font-weight: 500; margin: 1.5rem 0 0.75rem; }
+  .info-card { background: #fff; border: 1px solid #e0e0e0; border-radius: 12px; padding: 1rem 1.25rem; margin-bottom: 10px; }
+  .info-card h4 { font-size: 14px; font-weight: 500; margin-bottom: 4px; }
+  .info-card p { font-size: 13px; color: #666; line-height: 1.6; }
+  .info-tag { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 20px; margin-bottom: 6px; }
+  .tag-bio { background: #E1F5EE; color: #085041; }
+  .tag-math { background: #E6F1FB; color: #0C447C; }
+  .tag-risk { background: #FAECE7; color: #712B13; }
+
+  .chart-wrap { position: relative; height: 220px; margin: 1rem 0; }
+  .chart-wrap2 { position: relative; height: 180px; margin: 1rem 0; }
+  .legend { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 8px; font-size: 12px; color: #777; }
+  .legend span { display: flex; align-items: center; gap: 4px; }
+  .leg-sq { width: 10px; height: 10px; border-radius: 2px; }
+
+  .tip-list { list-style: none; padding: 0; }
+  .tip-list li { padding: 8px 0; border-bottom: 1px solid #eee; font-size: 14px; line-height: 1.5; }
+  .tip-list li:last-child { border-bottom: none; }
+  .tip-list li::before { content: "→ "; color: #1D9E75; font-weight: 500; }
+
+  .restart-row { text-align: center; padding: 1.5rem 0; }
+  .partial-note { background: #FAEEDA; border-radius: 8px; padding: 10px 14px; margin-bottom: 1rem; font-size: 13px; color: #633806; }
+
+  @media (max-width: 480px) {
+    .metrics-grid { grid-template-columns: repeat(2, 1fr); }
+    .header h1 { font-size: 18px; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- TELA INICIAL -->
+  <div id="screen-intro" class="screen active">
+    <div class="header">
+      <span class="badge">Feira de Ciências · Biologia & Matemática</span>
+      <h1>Como as redes sociais estão escravizando você?</h1>
+      <p>Descubra como seus hábitos digitais afetam seu cérebro, seu corpo e sua saúde — com dados e gráficos reais sobre você.</p>
+    </div>
+    <div class="info-card" style="margin-bottom: 10px;">
+      <span class="info-tag tag-bio">Biologia</span>
+      <h4>Por que isso importa?</h4>
+      <p>O uso excessivo de telas altera a produção de dopamina, o hormônio do prazer, criando um ciclo de dependência similar ao de certas substâncias.</p>
+    </div>
+    <div class="info-card">
+      <span class="info-tag tag-math">Matemática</span>
+      <h4>O que você vai ver?</h4>
+      <p>Seu perfil digital em números: horas perdidas por ano, percentual de risco, e comparações com médias nacionais e recomendações da OMS.</p>
+    </div>
+    <div style="text-align: center; margin-top: 1.5rem;">
+      <button class="btn btn-primary" onclick="startQuiz()" style="padding: 11px 32px; font-size: 15px;">Iniciar questionário →</button>
+      <p style="font-size: 12px; color: #999; margin-top: 8px;">Você pode sair a qualquer momento e ainda ver seus resultados parciais</p>
+    </div>
+  </div>
+
+  <!-- TELA DO QUESTIONÁRIO -->
+  <div id="screen-quiz" class="screen">
+    <div class="progress-bar"><div class="progress-fill" id="prog"></div></div>
+    <div class="progress-label" id="prog-label"></div>
+    <div id="question-area"></div>
+    <div class="nav-row">
+      <button class="btn" id="btn-back" onclick="goBack()">← Voltar</button>
+      <button class="btn btn-primary" id="btn-next" onclick="goNext()">Próxima →</button>
+    </div>
+    <div class="early-exit">
+      <button class="btn-danger btn" onclick="showResults(true)">Sair agora e ver resultados parciais</button>
+    </div>
+  </div>
+
+  <!-- TELA DE RESULTADOS -->
+  <div id="screen-results" class="screen">
+    <div id="results-content"></div>
+    <div class="restart-row">
+      <button class="btn" onclick="restart()">↺ Refazer questionário</button>
+      <p style="font-size: 12px; color: #999; margin-top: 6px;">Mostre para outra pessoa!</p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const questions = [
+  {
+    q: "Quantas horas por dia você usa redes sociais?",
+    sub: "Some todas as plataformas: Instagram, TikTok, YouTube, WhatsApp...",
+    key: "horasDia",
+    opts: [
+      { text: "Menos de 1 hora", val: 1, score: 0 },
+      { text: "1 a 2 horas", val: 1.5, score: 1 },
+      { text: "2 a 4 horas", val: 3, score: 2 },
+      { text: "4 a 6 horas", val: 5, score: 3 },
+      { text: "Mais de 6 horas", val: 7, score: 4 }
+    ]
+  },
+  {
+    q: "Qual é o primeiro aplicativo que você abre ao acordar?",
+    sub: "Seja honesto(a)!",
+    key: "abreAcordar",
+    opts: [
+      { text: "Não mexo no celular logo ao acordar", val: "nao", score: 0 },
+      { text: "Mensagens / WhatsApp", val: "msg", score: 1 },
+      { text: "Instagram ou TikTok", val: "social", score: 2 },
+      { text: "YouTube", val: "yt", score: 2 },
+      { text: "Notícias ou e-mail", val: "news", score: 1 }
+    ]
+  },
+  {
+    q: "Com que frequência você verifica o celular sem motivo específico?",
+    sub: "Pegar o celular só para ver se tem algo novo...",
+    key: "verificaSemMotivo",
+    opts: [
+      { text: "Raramente / quase nunca", val: 0, score: 0 },
+      { text: "Algumas vezes ao dia", val: 5, score: 1 },
+      { text: "A cada 30 minutos", val: 20, score: 2 },
+      { text: "A cada 10 minutos", val: 50, score: 3 },
+      { text: "Constantemente, não consigo parar", val: 80, score: 4 }
+    ]
+  },
+  {
+    q: "Você já sentiu ansiedade quando ficou sem celular ou internet?",
+    sub: "FOMO: Fear Of Missing Out (medo de ficar de fora)",
+    key: "ansiedadeSemCelular",
+    opts: [
+      { text: "Nunca senti isso", val: 0, score: 0 },
+      { text: "Raramente", val: 1, score: 1 },
+      { text: "Às vezes, fico um pouco inquieto(a)", val: 2, score: 2 },
+      { text: "Frequentemente me sinto ansioso(a)", val: 3, score: 3 },
+      { text: "Sempre, é insuportável ficar sem", val: 4, score: 4 }
+    ]
+  },
+  {
+    q: "Como você dorme?",
+    sub: "Horas de sono e qualidade",
+    key: "sono",
+    opts: [
+      { text: "Durmo 8h+ bem, sem celular na cama", val: "bom", score: 0 },
+      { text: "Durmo 7-8h, uso celular mas consigo dormir", val: "ok", score: 1 },
+      { text: "Durmo 6-7h, celular na cama às vezes me atrasa", val: "med", score: 2 },
+      { text: "Durmo menos de 6h, fico no celular até tarde", val: "ruim", score: 3 },
+      { text: "Tenho dificuldade grande para dormir por causa do celular", val: "pessimo", score: 4 }
+    ]
+  },
+  {
+    q: "Você compara sua vida, corpo ou conquistas com o que vê nas redes?",
+    sub: "Filtros, poses perfeitas e vidas editadas...",
+    key: "comparacao",
+    opts: [
+      { text: "Nunca / sei que é tudo editado", val: 0, score: 0 },
+      { text: "Raramente", val: 1, score: 1 },
+      { text: "Às vezes isso me incomoda", val: 2, score: 2 },
+      { text: "Frequentemente me sinto inferior", val: 3, score: 3 },
+      { text: "Sempre, isso me deixa mal com frequência", val: 4, score: 4 }
+    ]
+  },
+  {
+    q: "Quanto tempo você costuma passar em uma única sessão nas redes?",
+    sub: "Você entra para 'ver uma coisa só' e...",
+    key: "sessao",
+    opts: [
+      { text: "Menos de 10 minutos e saio", val: 10, score: 0 },
+      { text: "10 a 30 minutos", val: 20, score: 1 },
+      { text: "30 minutos a 1 hora", val: 45, score: 2 },
+      { text: "1 a 2 horas sem perceber", val: 90, score: 3 },
+      { text: "Mais de 2 horas de uma vez", val: 150, score: 4 }
+    ]
+  },
+  {
+    q: "Com que frequência você pratica atividade física?",
+    sub: "Academia, esporte, caminhada, dança...",
+    key: "ativFisica",
+    opts: [
+      { text: "Todo dia ou quase", val: 5, score: 0 },
+      { text: "3 a 4 vezes por semana", val: 3, score: 1 },
+      { text: "1 a 2 vezes por semana", val: 1, score: 2 },
+      { text: "Raramente, menos de uma vez por semana", val: 0.3, score: 3 },
+      { text: "Não pratico atividade física", val: 0, score: 4 }
+    ]
+  }
+];
+
+let answers = {};
+let current = 0;
+let charts = [];
+
+function startQuiz() {
+  showScreen('screen-quiz');
+  renderQuestion();
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function renderQuestion() {
+  const q = questions[current];
+  const pct = Math.round((current / questions.length) * 100);
+  document.getElementById('prog').style.width = pct + '%';
+  document.getElementById('prog-label').textContent = 'Pergunta ' + (current + 1) + ' de ' + questions.length;
+  document.getElementById('btn-back').style.visibility = current === 0 ? 'hidden' : 'visible';
+  document.getElementById('btn-next').textContent = current === questions.length - 1 ? 'Ver resultados →' : 'Próxima →';
+
+  const selected = answers[q.key];
+  const area = document.getElementById('question-area');
+  area.innerHTML =
+    '<div class="question-card">' +
+      '<div class="question-num">Pergunta ' + (current + 1) + '</div>' +
+      '<div class="question-text">' + q.q + '</div>' +
+      (q.sub ? '<div class="question-sub">' + q.sub + '</div>' : '') +
+      '<div class="options">' +
+        q.opts.map(function(o, i) {
+          return '<button class="option-btn' + (selected === i ? ' selected' : '') + '" onclick="selectOption(' + i + ')">' + o.text + '</button>';
+        }).join('') +
+      '</div>' +
+    '</div>';
+}
+
+function selectOption(i) {
+  answers[questions[current].key] = i;
+  document.querySelectorAll('.option-btn').forEach(function(b, idx) {
+    b.classList.toggle('selected', idx === i);
+  });
+}
+
+function goNext() {
+  if (answers[questions[current].key] === undefined) {
+    document.querySelectorAll('.option-btn').forEach(function(b) {
+      b.style.border = '1px solid #D85A30';
+      setTimeout(function() { b.style.border = ''; }, 600);
+    });
+    return;
+  }
+  if (current < questions.length - 1) {
+    current++;
+    renderQuestion();
+  } else {
+    showResults(false);
+  }
+}
+
+function goBack() {
+  if (current > 0) { current--; renderQuestion(); }
+}
+
+function computeResults() {
+  const answered = Object.keys(answers).length;
+  let totalScore = 0;
+  Object.entries(answers).forEach(function(entry) {
+    const key = entry[0], idx = entry[1];
+    const qObj = questions.find(function(q) { return q.key === key; });
+    if (qObj) totalScore += qObj.opts[idx].score;
+  });
+  const maxPossible = answered * 4;
+  const pctRisk = maxPossible > 0 ? Math.round((totalScore / maxPossible) * 100) : 0;
+
+  const horasQ = questions.find(function(q) { return q.key === 'horasDia'; });
+  const horasDia = answers['horasDia'] !== undefined ? horasQ.opts[answers['horasDia']].val : 3;
+  const horasAno = Math.round(horasDia * 365);
+  const diasAno = Math.round(horasAno / 24);
+
+  const verificaQ = questions.find(function(q) { return q.key === 'verificaSemMotivo'; });
+  const verificaDia = answers['verificaSemMotivo'] !== undefined ? verificaQ.opts[answers['verificaSemMotivo']].val : 20;
+
+  const sessaoQ = questions.find(function(q) { return q.key === 'sessao'; });
+  const sessaoMin = answers['sessao'] !== undefined ? sessaoQ.opts[answers['sessao']].val : 45;
+
+  var riskLabel, riskClass;
+  if (pctRisk < 30) { riskLabel = 'Baixo risco'; riskClass = 'risk-low'; }
+  else if (pctRisk < 60) { riskLabel = 'Risco moderado'; riskClass = 'risk-med'; }
+  else { riskLabel = 'Alto risco'; riskClass = 'risk-high'; }
+
+  return { answered, totalScore, maxPossible, pctRisk, horasDia, horasAno, diasAno, verificaDia, sessaoMin, riskLabel, riskClass };
+}
+
+function getScore(key) {
+  const q = questions.find(function(q) { return q.key === key; });
+  if (!q || answers[key] === undefined) return null;
+  return q.opts[answers[key]].score;
+}
+
+function showResults(partial) {
+  charts.forEach(function(c) { try { c.destroy(); } catch(e){} });
+  charts = [];
+  showScreen('screen-results');
+  const r = computeResults();
+
+  const tipsAll = [
+    'Estabeleça horários fixos para checar redes sociais — 2 a 3 vezes ao dia é suficiente.',
+    'Ative o modo "Não perturbe" durante o sono. A luz azul das telas inibe a melatonina.',
+    'Pratique a "hora de ouro": deixe o celular longe por 1h após acordar.',
+    'Desative as notificações de redes sociais. Cada notificação dispara dopamina e interrompe o foco.',
+    'Experimente 1 dia por semana sem redes sociais. Seu cérebro precisa de descanso digital.',
+    'Lembre-se: redes sociais mostram o "highlight reel" da vida das pessoas, não a realidade delas.',
+  ];
+  const tips = r.pctRisk >= 30 ? tipsAll : tipsAll.slice(0, 3);
+
+  const circumference = 2 * Math.PI * 40;
+  const dash = circumference * (r.pctRisk / 100);
+  const ringColor = r.pctRisk < 30 ? '#1D9E75' : r.pctRisk < 60 ? '#BA7517' : '#D85A30';
+  const anosVida = Math.round(r.horasDia * 365 * 55 / 24 / 365);
+
+  const sonoScore = getScore('sono');
+  const ansScore = getScore('ansiedadeSemCelular');
+  const sessaoScore = getScore('sessao');
+  const compScore = getScore('comparacao');
+  const ativScore = getScore('ativFisica');
+
+  document.getElementById('results-content').innerHTML =
+    (partial ? '<div class="partial-note"><strong>Resultado parcial</strong> — você respondeu ' + r.answered + ' de ' + questions.length + ' perguntas. Os dados abaixo refletem suas respostas até aqui.</div>' : '') +
+    '<div class="results-header">' +
+      '<div class="score-ring">' +
+        '<svg viewBox="0 0 100 100">' +
+          '<circle cx="50" cy="50" r="40" fill="none" stroke="#e5e5e5" stroke-width="10"/>' +
+          '<circle cx="50" cy="50" r="40" fill="none" stroke="' + ringColor + '" stroke-width="10"' +
+            ' stroke-dasharray="' + dash.toFixed(1) + ' ' + circumference.toFixed(1) + '"' +
+            ' stroke-linecap="round" transform="rotate(-90 50 50)"/>' +
+        '</svg>' +
+        '<div class="score-text">' + r.pctRisk + '%</div>' +
+      '</div>' +
+      '<span class="risk-badge ' + r.riskClass + '">' + r.riskLabel + ' de dependência digital</span>' +
+      '<p style="font-size:13px;color:#999;margin-top:4px;">Baseado em ' + r.answered + ' resposta' + (r.answered !== 1 ? 's' : '') + '</p>' +
+    '</div>' +
+
+    '<div class="metrics-grid">' +
+      '<div class="metric-card"><div class="metric-val" style="color:' + ringColor + ';">' + r.horasDia + 'h</div><div class="metric-lbl">por dia nas telas</div></div>' +
+      '<div class="metric-card"><div class="metric-val">' + r.horasAno.toLocaleString('pt-BR') + '</div><div class="metric-lbl">horas por ano</div></div>' +
+      '<div class="metric-card"><div class="metric-val">' + r.diasAno + '</div><div class="metric-lbl">dias inteiros por ano</div></div>' +
+      '<div class="metric-card"><div class="metric-val">' + r.verificaDia + '</div><div class="metric-lbl">verificações/dia</div></div>' +
+    '</div>' +
+
+    '<p class="section-title">Seus hábitos em perspectiva</p>' +
+    '<div class="legend">' +
+      '<span><span class="leg-sq" style="background:#1D9E75"></span>Você</span>' +
+      '<span><span class="leg-sq" style="background:#378ADD"></span>Média brasileira</span>' +
+      '<span><span class="leg-sq" style="background:#D85A30"></span>Limite OMS</span>' +
+    '</div>' +
+    '<div class="chart-wrap"><canvas id="chart1"></canvas></div>' +
+
+    '<p class="section-title">Impactos na saúde (biologia)</p>' +
+    '<div class="chart-wrap2"><canvas id="chart2"></canvas></div>' +
+
+    '<p class="section-title">O que acontece no seu cérebro</p>' +
+    '<div class="info-card"><span class="info-tag tag-bio">Neurobiologia</span><h4>O ciclo da dopamina</h4><p>Cada notificação, like ou novo vídeo libera dopamina — o neurotransmissor do prazer. O algoritmo é projetado para manter esse ciclo ativo, criando um padrão comportamental similar ao de apostas e jogos de azar.</p></div>' +
+    '<div class="info-card"><span class="info-tag tag-math">Dado matemático</span><h4>Quanto tempo você vai gastar em 55 anos?</h4><p>Se você usar ' + r.horasDia + 'h/dia por mais 55 anos: <strong>' + Math.round(r.horasDia * 365 * 55 / 24).toLocaleString('pt-BR') + ' dias inteiros</strong> — quase ' + anosVida + ' ano' + (anosVida !== 1 ? 's' : '') + ' da sua vida nas redes sociais.</p></div>' +
+    (r.pctRisk >= 30
+      ? '<div class="info-card"><span class="info-tag tag-risk">Alerta de saúde</span><h4>Riscos identificados no seu perfil</h4><p>Seu padrão de uso pode estar associado a: dificuldades de atenção e concentração, alterações no sono, ansiedade social e comparação constante. Esses são sinais reconhecidos pela psicologia como relacionados ao uso excessivo de mídias digitais.</p></div>'
+      : '<div class="info-card"><span class="info-tag tag-bio">Parabéns!</span><h4>Seu perfil digital está saudável</h4><p>Você demonstra uma relação equilibrada com as redes sociais. Continue mantendo esse hábito e compartilhe essa consciência com amigos e família!</p></div>'
+    ) +
+
+    '<p class="section-title">O que você pode fazer</p>' +
+    '<ul class="tip-list">' + tips.map(function(t) { return '<li>' + t + '</li>'; }).join('') + '</ul>';
+
+  setTimeout(function() {
+    const ctx1 = document.getElementById('chart1').getContext('2d');
+    charts.push(new Chart(ctx1, {
+      type: 'bar',
+      data: {
+        labels: ['Horas/dia em telas', 'Verificações do celular/dia', 'Sessão média (min)'],
+        datasets: [
+          { label: 'Você', data: [r.horasDia, Math.min(r.verificaDia, 80), r.sessaoMin], backgroundColor: '#1D9E75' },
+          { label: 'Média brasileira', data: [4.8, 40, 60], backgroundColor: '#378ADD' },
+          { label: 'Limite OMS', data: [2, 10, 20], backgroundColor: '#D85A30' }
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { beginAtZero: true, ticks: { font: { size: 11 } } },
+          x: { ticks: { font: { size: 11 } } }
+        }
+      }
+    }));
+
+    const ctx2 = document.getElementById('chart2').getContext('2d');
+    charts.push(new Chart(ctx2, {
+      type: 'radar',
+      data: {
+        labels: ['Sono', 'Ansiedade', 'Atenção', 'Autoestima', 'Sedentarismo', 'Dependência'],
+        datasets: [{
+          label: 'Seu perfil de risco',
+          data: [
+            sonoScore !== null ? sonoScore * 25 : r.pctRisk,
+            ansScore !== null ? ansScore * 25 : r.pctRisk,
+            sessaoScore !== null ? sessaoScore * 25 : r.pctRisk,
+            compScore !== null ? compScore * 25 : r.pctRisk,
+            ativScore !== null ? ativScore * 25 : r.pctRisk,
+            r.pctRisk
+          ],
+          fill: true,
+          backgroundColor: 'rgba(29,158,117,0.15)',
+          borderColor: '#1D9E75',
+          pointBackgroundColor: '#1D9E75'
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        scales: { r: { beginAtZero: true, max: 100, ticks: { font: { size: 10 }, stepSize: 25 } } },
+        plugins: { legend: { display: false } }
+      }
+    }));
+  }, 100);
+}
+
+function restart() {
+  answers = {};
+  current = 0;
+  charts.forEach(function(c) { try { c.destroy(); } catch(e){} });
+  charts = [];
+  showScreen('screen-intro');
+}
+</script>
+</body>
+</html>
